@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs"
 import {createError} from "../error.js";
 import jwt from "jsonwebtoken"
 import nodemailer from "nodemailer"
+import dotenv from "dotenv";
 
 const verificationCodes = new Map();
 
@@ -15,18 +16,18 @@ export const sendVerificationCode = async (req, res, next) => {
         verificationCodes.set(email, verificationCode);
 
         let transporter = nodemailer.createTransport({
-            host: "smtp-mail.outlook.com",
+            host: "smtp-mail.outlook.com", // 请自行设定发件服务器
             port: 587,
             secure: false,
             auth: {
-                user: "frisk2410006@outlook.com",
-                pass: "ozwszabychbbvakw"
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASS
             }
         });
 
 
         await transporter.sendMail({
-            from: "frisk2410006@outlook.com",
+            from: process.env.MAIL_USER,
             to: email,
             subject: "注册验证码",
             text: `您正在申请邮箱注册，验证码为：${verificationCode}，5分钟内有效！`
