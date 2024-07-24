@@ -1,0 +1,29 @@
+version: '3'
+services:
+  frontend:
+    build: ./caria_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://backend:8800
+      - NODE_ENV=production
+    # package.json 中的代理设置在容器中生效
+    volumes:
+      - ./caria_frontend/package.json:/app/package.json
+
+  backend:
+    build: ./caria_backend
+    ports:
+      - "8800:8800"
+    environment:
+      - MONGO_URI=mongodb+srv://2410006:Optimistic7@cluster0.g9tolok.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      - NODE_ENV=production
+      - CORS_ORIGIN=http://localhost:3000
+    # 确保后端应用监听正确的端口
+    command: npm start
+
+networks:
+  default:
+    driver: bridge
