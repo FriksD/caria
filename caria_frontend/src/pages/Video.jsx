@@ -135,20 +135,27 @@ const Video = () => {
     const path = useLocation().pathname.split("/")[2];
 
     const [channel, setChannel] = useState({});
-    const [viewAdded, setViewAdded] = useState(false);
+
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
                 const videoRes = await axios.get(`/videos/find/${path}`);
                 const channelRes = await axios.get(`/users/find/${videoRes.data.userId}`);
                 setChannel(channelRes.data);
                 dispatch(fetchSucceed(videoRes.data));
             } catch (err) {
+                // 处理错误
+            } finally {
+                setLoading(false);
             }
         }
         fetchData();
     }, [path, dispatch])
+
+
 
     const handleLike = async () => {
         if (!currentUser) {
@@ -205,21 +212,6 @@ const Video = () => {
     }
 
 
-    useEffect(() => {
-        const addView = async () => {
-            try {
-                if (currentVideo && !viewAdded) {
-                    await axios.put(`/videos/view/${currentVideo._id}`);
-                    setViewAdded(true);
-                    // 更新 Redux store 中的播放量
-                    dispatch(fetchSucceed({...currentVideo, views: currentVideo.views + 1}));
-                }
-            } catch (err) {
-                console.error("Error adding view:", err);
-            }
-        };
-        addView();
-    }, [currentVideo, viewAdded, dispatch]);
 
     return (
         <Container>
@@ -227,7 +219,11 @@ const Video = () => {
                 <VideoWrapper>
                     <VideoPlayer src={currentVideo.videoUrl}/>
                 </VideoWrapper>
-                <Title>{currentVideo.title}</Title>
+                {loading ? (
+                    <Title>加载中...</Title>
+                ) : (
+                    <Title>{currentVideo.title}</Title>
+                )}
                 <Details>
                     <Info>{numConvert(currentVideo.views)} 观看 • {format(currentVideo.createdAt, 'zh_CN')}</Info>
                     <Buttons>
@@ -251,7 +247,11 @@ const Video = () => {
                     <ChannelInfo>
                         <Image src={channel.img}/>
                         <ChannelDetail>
-                            <ChannelName>{channel.name}</ChannelName>
+                            {loading ? (
+                                <ChannelName>加载中...</ChannelName>
+                            ) : (
+                                <ChannelName>{channel.name}</ChannelName>
+                            )}
                             <ChannelCounter>{numConvert(channel.subscribers)} 粉丝</ChannelCounter>
                             <Description>
                                 {currentVideo.desc}

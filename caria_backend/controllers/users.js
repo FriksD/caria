@@ -99,11 +99,44 @@ export const like = async (req, res, next) => {
 
 export const dislike = async (req, res, next) => {
     const id = req.user.id;
-    const videoId = req.params.videoId
+    const videoId = req.params.videoId;
     try {
         await video.findByIdAndUpdate(videoId, {$addToSet: {dislikes: id}, $pull: {likes: id}});
         res.status(200).json("点踩成功");
     } catch (err) {
+        next(err);
+    }
+}
+
+export const history = async (req, res, next) => {
+    const id = req.user.id;
+    const videoId = req.params.videoId;
+    try{
+        const currentUser = await user.findById(id);
+        const videoIndex = currentUser.history.indexOf(videoId);
+
+        if (videoIndex !== -1){
+            currentUser.history.splice(videoIndex, 1);
+        }
+        currentUser.history.unshift(videoId);
+        await currentUser.save();
+
+        res.status(200).json("历史记录更新成功");
+    }catch (err){
+
+    }
+}
+
+export const getHistory = async (req, res, next) => {
+    const id = req.user.id;
+    try{
+        const User = await user.findById(id);
+        const videoIds = User.history;
+        const videoHistory = await video.find({ '_id': { $in: videoIds } });
+        videoHistory.sort((a, b) => videoIds.indexOf(a._id.toString()) - videoIds.indexOf(b._id.toString()));
+
+        res.status(200).json(videoHistory);
+    }catch (err){
         next(err);
     }
 }

@@ -1,5 +1,15 @@
 import express from "express";
-import {update, getUser, deleteUser, subscribe, unsubscribe, like, dislike, getAll} from "../controllers/users.js";
+import {
+    update,
+    getUser,
+    deleteUser,
+    subscribe,
+    unsubscribe,
+    like,
+    dislike,
+    getAll,
+    history
+} from "../controllers/users.js";
 import {verifyAdminToken, verifyToken} from "../verifyToken.js";
 
 const router = express.Router();
@@ -28,5 +38,10 @@ router.put("/like/:videoId", verifyToken, like);
 
 //取消点赞
 router.put("/dislike/:videoId", verifyToken, dislike);
+
+//添加到历史记录
+router.put("/history/:videoId", verifyToken, history);
+
+
 
 export default router;

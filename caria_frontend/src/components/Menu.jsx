@@ -150,10 +150,12 @@ const Menu = ({darkMode, setDarkMode}) => {
                         视频库
                     </Item>
                 </Link>
+                <Link to="history" style={{textDecoration: "none", color: "inherit"}}>
                 <Item>
                     <HistoryOutlinedIcon/>
                     历史记录
                 </Item>
+                </Link>
                 <Hr/>
                 {!currentUser && (
                     <>

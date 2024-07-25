@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import styled from "styled-components";
 import {format} from "timeago.js";
 import axios from "axios";
@@ -89,6 +89,7 @@ const Info = styled.div`
 
 const Card = ({type, video}) => {
     const [channel, setChannels] = useState({});
+    const history = useNavigate();
 
     useEffect(() => {
         const fetchChannel = async () => {
@@ -107,9 +108,15 @@ const Card = ({type, video}) => {
         return num;
     };
 
+    const NavigateTo = async () => {
+        await axios.put(`/videos/view/${video._id}`);
+        await axios.put(`/users/history/${video._id}`);
+        history(`/video/${video._id}`);
+    }
+
     return (
         <Container type={type}>
-            <ImageWrapper to={`/video/${video._id}`} type={type}>
+            <ImageWrapper onClick={NavigateTo} type={type}>
                 <Image src={video.imgUrl}/>
             </ImageWrapper>
             <Details type={type}>
@@ -117,7 +124,7 @@ const Card = ({type, video}) => {
                     <ChannelImage src={channel.img}/>
                 </ChannelImageWrapper>
                 <Texts>
-                    <TitleWrapper to={`/video/${video._id}`}>
+                    <TitleWrapper onClick={NavigateTo}>
                         <Title>{video.title}</Title>
                     </TitleWrapper>
                     <ChannelNameWrapper to={`/user/${video.userId}`}>

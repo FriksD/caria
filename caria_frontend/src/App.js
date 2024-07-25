@@ -70,6 +70,7 @@ function App() {
                                             <Route path="trend" element={<Home type="trend"/>}/>
                                             <Route path="sub" element={<Home type="sub"/>}/>
                                             <Route path="all" element={<Home type="findAll"/>}/>
+                                            <Route path="history" element={<Home type="history"/>}/>
                                             <Route path="search" element={<Search/>}/>
                                             <Route path="signin" element={<SignIn/>}/>
                                             <Route path="register" element={<Register/>}/>

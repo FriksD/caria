@@ -12,6 +12,7 @@ import {
     search, getAll, getUserVideos, getLikedVideos
 } from "../controllers/videos.js";
 import {verifyAdminToken, verifyToken} from "../verifyToken.js"
+import {getHistory} from "../controllers/users.js";
 
 const router = express.Router();
 
@@ -44,6 +45,9 @@ router.get("/user/:id", getUserVideos);
 
 //获取一个用户喜欢的所有视频
 router.get("/liked/:id", getLikedVideos);
+
+//获取用户的历史记录
+router.get("/history", verifyToken, getHistory);
 
 //查看订阅的所有视频
 router.get("/sub", verifyToken, sub);
