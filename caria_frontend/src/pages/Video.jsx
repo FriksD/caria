@@ -225,7 +225,7 @@ const Video = () => {
                     <Title>{currentVideo.title}</Title>
                 )}
                 <Details>
-                    <Info>{numConvert(currentVideo.views)} 观看 • {format(currentVideo.createdAt, 'zh_CN')}</Info>
+                    <Info>{ loading ? " " : numConvert(currentVideo.views)} 观看 • {loading ? " " : format(currentVideo.createdAt, 'zh_CN')}</Info>
                     <Buttons>
                         <Button onClick={handleLike}>
                             {currentVideo.likes?.includes(currentUser?._id) ? <ThumbUp/> :
@@ -245,16 +245,14 @@ const Video = () => {
                 <Hr/>
                 <Channel>
                     <ChannelInfo>
-                        <Image src={channel.img}/>
+                        <Image src={loading ? " " : channel.img}/>
                         <ChannelDetail>
-                            {loading ? (
-                                <ChannelName>加载中...</ChannelName>
-                            ) : (
-                                <ChannelName>{channel.name}</ChannelName>
-                            )}
-                            <ChannelCounter>{numConvert(channel.subscribers)} 粉丝</ChannelCounter>
+                                <ChannelName>
+                                    {loading ? "加载中" : channel.name}
+                                </ChannelName>
+                            <ChannelCounter>{ loading ? " " : numConvert(channel.subscribers) } 粉丝</ChannelCounter>
                             <Description>
-                                {currentVideo.desc}
+                                {loading ? "加载中..." : currentVideo.desc}
                             </Description>
                         </ChannelDetail>
                     </ChannelInfo>
