@@ -1,7 +1,67 @@
 import {createError} from "../error.js";
 import video from "../models/video.js"
 import user from "../models/user.js";
-import {subscribe} from "./users.js";
+import {esClient} from "../utils/syncTo.js";
+
+
+export const search = async (req, res, next) => {
+    const query = req.query.q;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    console.log(`搜索查询: "${query}", 页码: ${page}, 每页限制: ${limit}`);
+
+    try {
+        const searchBody = {
+            query: {
+                multi_match: {
+                    query: query,
+                    fields: ['title^3', 'desc^2', 'tags^2', 'doc.title^3', 'doc.desc^2', 'doc.tags^2'],
+                    fuzziness: 'AUTO',
+                    operator: 'or'
+                }
+            }
+        };
+
+        console.log('搜索查询体:', JSON.stringify(searchBody, null, 2));
+
+        const result = await esClient.search({
+            index: 'videos',
+            body: searchBody,
+            from: (page - 1) * limit,
+            size: limit
+        });
+
+        console.log(`搜索结果总数: ${result.hits.total.value}`);
+
+        const videos = result.hits.hits.map(hit => {
+            const source = hit._source;
+            const doc = source.doc || {};
+            return {
+                _id: hit._id,
+                title: doc.title || source.title,
+                desc: doc.desc || source.desc,
+                tags: doc.tags || source.tags,
+                userId: doc.userId || source.userId,
+                imgUrl: doc.imgUrl || source.imgUrl,
+                duration: doc.duration || source.duration,
+                createdAt: doc.createdAt || source.createdAt,
+                views: doc.views || source.views,
+            };
+        });
+
+        console.log(`返回的视频数量: ${videos.length}`);
+
+        res.status(200).json(videos);
+    } catch (err) {
+        console.error('Elasticsearch 错误:', err);
+        res.status(500).json({ error: err.message });
+    }
+};
+
+
+
+
 
 
 export const addVideo = async (req, res, next) => {
@@ -138,12 +198,3 @@ export const getByTag = async (req, res, next) => {
 }
 
 
-export const search = async (req, res, next) => {
-    const query = req.query.q;
-    try {
-        const videos = await video.find({title: {$regex: query, $options: "i"}})
-        res.status(200).json(videos);
-    } catch (err) {
-        next(err);
-    }
-}

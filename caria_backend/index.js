@@ -10,6 +10,7 @@ import uploadRoutes from './routes/upload.js'
 import cookieParser from "cookie-parser";
 import path from 'path';
 import {fileURLToPath} from 'url';
+import {syncTo} from "./utils/syncTo.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,5 +45,6 @@ const PORT = process.env.PORT || 8800;
 
 app.listen(PORT, () => {
     connect();
+    syncTo()
     console.log(`已连接至服务器，运行于端口 ${PORT}！`);
 });
