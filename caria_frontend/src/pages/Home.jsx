@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import styled from "styled-components";
 import Card from "../components/Card";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -18,10 +19,15 @@ const Container = styled.div`
 
 const Home = ({type}) => {
     const [videos, setVideos] = useState([]);
+    const history = useNavigate();
 
     useEffect(() => {
         const fetchVideos = async () => {
             const res = await axios.get(`/videos/${type}`);
+            if (!res){
+                alert("用户未登录！");
+                history("/login");
+            }
             setVideos(res.data);
         };
         fetchVideos();

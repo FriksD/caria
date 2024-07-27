@@ -3,6 +3,7 @@ import {Link, useNavigate} from "react-router-dom";
 import styled from "styled-components";
 import {format} from "timeago.js";
 import axios from "axios";
+import {useSelector} from "react-redux";
 
 const Container = styled.div`
   width: ${(props) => (props.type !== "sm" ? "360px" : "100%")};
@@ -90,6 +91,7 @@ const Info = styled.div`
 const Card = ({type, video}) => {
     const [channel, setChannels] = useState({});
     const history = useNavigate();
+    const { currentUser } = useSelector((state) => state.user);
 
     useEffect(() => {
         const fetchChannel = async () => {
@@ -110,7 +112,7 @@ const Card = ({type, video}) => {
 
     const NavigateTo = async () => {
         await axios.put(`/videos/view/${video._id}`);
-        await axios.put(`/users/history/${video._id}`);
+        if ( currentUser ) await axios.put(`/users/history/${video._id}`);
         history(`/video/${video._id}`);
     }
 

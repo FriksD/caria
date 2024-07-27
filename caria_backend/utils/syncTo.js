@@ -4,21 +4,42 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const esClient = new Client({
-    node: 'https://localhost:9200',
-    auth:{
-        username:'elastic',
-        password: process.env.ELA_PASS
-    },
-    tls: {
-        rejectUnauthorized: false
+
+const waitForElasticsearch = async (retries = 5, interval = 2000) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            await esClient.ping();
+            console.log("Elasticsearch 连接成功");
+            return;
+        } catch (error) {
+            console.log(`等待 Elasticsearch 启动中... (${i + 1}/${retries})`);
+            console.log(error);
+            await new Promise(resolve => setTimeout(resolve, interval));
+        }
     }
+    throw new Error("无法连接到 Elasticsearch");
+};
+
+
+
+
+export const esClient = new Client({
+    node: process.env.ELASTICSEARCH_URL ,
+    auth:{
+        username:process.env.ELASTICSEARCH_USERNAME,
+        password: process.env.ELASTICSEARCH_PASSWORD,
+    }
+
 });
 
 export const syncTo = async () => {
+    console.log(process.env.ELASTICSEARCH_URL);
+    console.log(process.env.ELASTICSEARCH_USERNAME);
+    console.log(process.env.ELASTICSEARCH_PASSWORD);
     const mongoClient = new MongoClient(process.env.MONGO);
 
     try {
+
         console.log("开始连接到 MongoDB...");
         await mongoClient.connect();
         console.log("MongoDB 连接成功");
@@ -27,6 +48,7 @@ export const syncTo = async () => {
         const collection = db.collection('videos');
 
         console.log("开始连接到 Elasticsearch...");
+        await waitForElasticsearch();
         await esClient.ping();
         console.log("Elasticsearch 连接成功");
 
@@ -81,6 +103,8 @@ export const syncTo = async () => {
         // console.log(result);
     } catch (error) {
         console.error("数据同步失败", error);
+        console.error('Elasticsearch URL:', process.env.ELASTICSEARCH_URL);
+        console.error('Elasticsearch Username:', process.env.ELASTICSEARCH_USERNAME);
     } finally {
         await mongoClient.close();
     }
